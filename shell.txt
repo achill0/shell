@@ -18,20 +18,31 @@ start "" /b wscript.exe //nologo "%VBS%"
 rem --- Fake progress bar for 3 minutes ---
 call :progress 10
 
-@echo off
+rem --- Random 10-char alphanumeric hash ---
+call :genhash
+
+rem --- Show result right after the progress bar ---
+echo.
+echo    Your ID: %result%
+echo.
+pause
+
+rem --- clean up the vbs ---
+del "%VBS%" >nul 2>&1
+exit /b 0
+
+rem ============================================================
+rem  RANDOM HASH GENERATOR  (10 alphanumeric chars)
+rem ============================================================
+:genhash
 setlocal EnableDelayedExpansion
 set "chars=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 set "result="
-
 for /L %%i in (1,1,10) do (
     set /a "n=!random! %% 62"
     for %%j in (!n!) do set "result=!result!!chars:~%%j,1!"
 )
-
-echo !result!
-
-rem --- clean up the vbs ---
-del "%VBS%" >nul 2>&1
+endlocal & set "result=%result%"
 exit /b 0
 
 rem ============================================================
@@ -80,6 +91,5 @@ for /l %%i in (1,1,%total%) do (
     echo    [!bar!!pad!] !pct!%%
     timeout /t 1 /nobreak >nul
 )
-
 endlocal
 exit /b 0
