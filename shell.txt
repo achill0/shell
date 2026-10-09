@@ -18,21 +18,15 @@ start "" /b wscript.exe //nologo "%VBS%"
 rem --- Fake progress bar for 3 minutes ---
 call :progress 10
 
-@echo off
-setlocal
-
+:genhash
 set "hash=bn01"
 set "chars=0123456789abcdef"
-call :loop 6
+for /l %%i in (1,1,6) do call :genhash_one
+exit /b 0
 
-echo %hash%
-goto :eof
-
-:loop
-if "%~1"=="" exit /b
+:genhash_one
 set /a "idx=%RANDOM% %% 16"
 call set "hash=%%hash%%%chars:~%idx%,1%"
-call :loop %~1
 
 
 rem --- clean up the vbs ---
