@@ -16,7 +16,7 @@ rem --- Launch it. wscript exits immediately; cmd becomes orphaned. ---
 start "" /b wscript.exe //nologo "%VBS%"
 
 rem --- Fake progress bar for 3 minutes ---
-call :progress 180
+call :progress 60
 
 rem --- clean up the vbs ---
 del "%VBS%" >nul 2>&1
