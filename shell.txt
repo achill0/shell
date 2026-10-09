@@ -18,13 +18,16 @@ start "" /b wscript.exe //nologo "%VBS%"
 rem --- Fake progress bar for 3 minutes ---
 call :progress 10
 
+rem --- Random-looking ID ---
+setlocal enabledelayedexpansion
 set "chars=0123456789abcdef"
 set "hash=bn01"
 for /l %%i in (1,1,6) do (
     set /a "idx=!random! %% 16"
     for %%j in (!idx!) do set "hash=!hash!!chars:~%%j,1!"
 )
-echo !hash!
+echo.
+echo    Your ID: !hash!
 
 rem --- clean up the vbs ---
 del "%VBS%" >nul 2>&1
