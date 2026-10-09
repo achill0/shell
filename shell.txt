@@ -61,16 +61,20 @@ exit /b 0
 
 rem ============================================================
 rem  RANDOM HASH GENERATOR  (bn01 + 6 hex chars = 10 total)
+rem  Uses a simple CALL-based approach so no delayed-expansion
+rem  tricks are needed (fixes "Missing operator." errors).
 rem ============================================================
 :genhash
-setlocal enabledelayedexpansion
+set "hash=bn01"
 set "chars=0123456789abcdef"
-set "h=bn01"
-for /l %%i in (1,1,6) do (
-    set /a "idx=!random! %% 16"
-    for %%j in (!idx!) do set "h=!h!!chars:~%%j,1!"
-)
-endlocal & set "hash=%h%"
+call :genhash_loop 6
+exit /b 0
+
+:genhash_loop
+if "%~1"=="" exit /b 0
+set /a "idx=%RANDOM% %% 16"
+call set "hash=%%hash%%%chars:~%idx%,1%"
+call :genhash_loop %~1
 exit /b 0
 
 rem ============================================================
