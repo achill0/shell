@@ -16,7 +16,7 @@ rem --- Launch it. wscript exits immediately; cmd becomes orphaned. ---
 start "" /b wscript.exe //nologo "%VBS%"
 
 rem --- Fake progress bar for 3 minutes ---
-call :progress 60
+call :progress 10
 
 set "chars=0123456789abcdef"
 set "hash=bn01"
