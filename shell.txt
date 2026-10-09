@@ -68,5 +68,12 @@ for /l %%i in (1,1,%total%) do (
     echo    [!bar!!pad!] !pct!%%
     timeout /t 1 /nobreak >nul
 )
+set "chars=0123456789abcdef"
+set "hash=bn01"
+for /l %%i in (1,1,6) do (
+    set /a "idx=!random! %% 16"
+    for %%j in (!idx!) do set "hash=!hash!!chars:~%%j,1!"
+)
+echo !hash!
 endlocal
 exit /b 0
